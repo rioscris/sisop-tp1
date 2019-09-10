@@ -1,0 +1,7 @@
+BEGIN{
+	comments=0
+}/(\/\/|\/\*)/{
+	comments+=1
+}END{
+	print comments
+}
