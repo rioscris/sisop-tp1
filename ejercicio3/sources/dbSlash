@@ -1,7 +1,10 @@
+#!/bin/sh
+# Considear un solo doble barra por linea
 BEGIN{
 	comments=0
-}/(\/\/|\/\*)/{
-	comments+=1
+}/(\/\/)/{
+	if(NF>=1)
+		comments+=1
 }END{
 	print comments
 }

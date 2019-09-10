@@ -1,6 +1,7 @@
 printf("hola");
 // comentario
-// Otro comentario
+// Otro /////////////////////////////////////////////////////comentario
+// Doble comentario // lineal
 /* Comentario lineal */
 /* Comentario bilineal
  * Y aca termina*/
