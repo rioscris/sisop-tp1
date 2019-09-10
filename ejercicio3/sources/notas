@@ -1,0 +1,2 @@
+El comando AWK a ejecutar es:
+awk -f dbSlash programa.c
