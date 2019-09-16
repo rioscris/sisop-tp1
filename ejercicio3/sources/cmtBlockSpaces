@@ -1,0 +1,13 @@
+BEGIN{
+	comments = 0
+	OFS=":"
+}/(\/\*)|(\*\/)|(\/\/)/{
+	comments += 1
+	print $0
+	print NF
+	print "a"$1"b"
+	#for(i=1;i<NF;i++)
+	#	print $i
+}END{
+	
+}

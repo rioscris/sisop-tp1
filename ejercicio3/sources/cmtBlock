@@ -1,0 +1,39 @@
+BEGIN{
+	comments = 0
+	codigo = 0
+	dbSlash = 0
+	cmtBlock = 0
+}/(\/\*)|(\*\/)|(\/\/)/{
+	#print $0
+	#print NF
+	#print "a"$1"b"
+	lineaCodigo = 0
+	dbSlash = 0
+	print "primer campo"$1
+	for(i=1;i<NF+1;i++){
+		if(cmtBlock == 0 && dbSlash == 0 && $i == "//"){
+			comments++;
+			dbSlash = 1;
+			next;
+		}
+		else if(dbSlash == 0 && cmtBlock == 0 && $i == "/*"){
+			cmtBlock = 1;
+			comments++;
+		}
+		else if(dbSlash == 0 && cmtBlock == 1 && $i == "*/"){
+			cmtBlock = 0;
+		}
+		else{
+			if(lineaCodigo == 0){
+				lineaCodigo = 1;
+				codigo++;
+			}
+		}
+	}
+	print $0
+	print "Comentarios:"comments;
+	print "Codigo:"codigo;
+}END{
+	#print "Comentarios: "comments;
+	#print codigo;
+}
