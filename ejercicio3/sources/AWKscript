@@ -54,7 +54,7 @@ BEGIN{
 		}
 		else{
 			#################################################
-			# Me encuentro dentro de un bloque comentario    #
+			# Me encuentro dentro de un bloque comentario   #
 			# Validacion de comentario por cierre de bloque #
 			#################################################
 			if($i == "*" && $(i+1) == "/"){
@@ -95,7 +95,8 @@ BEGIN{
 	total = total + linea;
 
 }END{
-	print total
-	print comentario
-	print codigo
+	print total, comentario, codigo;
+	#print total
+	#print comentario
+	#print codigo
 }
