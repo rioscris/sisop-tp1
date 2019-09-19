@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 BEGIN{
 	#comments = 0
 	#codigo = 0
@@ -37,6 +38,7 @@ BEGIN{
 	#print "Comentarios: "comments;
 	#print codigo;
 }
+=======
 BEGIN{
 	#comments = 0
 	#codigo = 0
@@ -76,3 +78,4 @@ BEGIN{
 	#print "Comentarios: "comments;
 	#print codigo;
 }
+>>>>>>> 90d3368a166d50308201b9b3fa7871ae72e11195
