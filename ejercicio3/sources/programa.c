@@ -6,10 +6,15 @@ int main(){
 	/*
 	/*
 	 *
+	 
 	 */
 	                            /**/
 	printf("Hola Mundo!\n");
-	printf("hola otra vez\n"); // comentario inline luego de codigo
+	printf/*comentario bloque dentro de linea*/("Linea de codigo con comentario en el medio\n")/*comentario bloque dentro de linea*/;
+	printf("Linea de codigo con comentario al final\n"); // comentario inline luego de codigo
+	printf("String con doble barra // en el medio\n");
+	printf("Linea de codigo con doble barra al final\n");//
+	printf("Linea de codigo con una sola barra al final\n");/
 }
 // comentario
 // Otro /////////////////////////////////////////////////////comentario
