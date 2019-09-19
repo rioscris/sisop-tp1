@@ -1,20 +1,51 @@
 #!/bin/bash
 
+#############################################################################
+#                   mostrar_ayuda()                                         #
+#############################################################################
+# Funcion a ser ejecutada tras recibir los parametros de ayuda              #
+# nombre_script     -h | -H | -? | --help | --HELP                          #                            
+#############################################################################
 mostrar_ayuda(){
-    echo "Ayuda"
+local ayuda='
+    Algo
+';
 }
 
+##############################################################################
+#                   validacion_parametros()                                  #
+##############################################################################
+# Funcion para validar los comandos enviados al script.                      #                            
+# - La extension no debe comenzar por punto. #                            
+# - El directorio recibido debe ser valido y existente.                      #                            
+##############################################################################
 validar_parametros(){
-    #echo "Validando parametros"
-    #echo $1 $2
-    return 0
+    valido=0;
+    if [[ ! -d $1 ]];
+    then
+        valido=1;       
+    fi                                                         # En caso de que no exista el directorio, retorna 1
+    # if [[ $2 =~ @"^[\w\-. ]+$" ]] && [[ $2 == \.* ]]         
+    if [[ $2 == \.* ]]           # En caso de no ser una extension valida, retorna 2
+    then
+        valido=2;                                                
+    fi
+    echo $valido
+    return $valido;
 }
 
-contar_lineas(){
-    #echo "contando lineas"
-    #echo $1;
-    echo "Conteo del archivo: " $1
-}
+##################################################################################
+#                   (variable global) AWKscript                                  #
+##################################################################################
+# Se realiza la busqueda de los caracteres especiales que puedan                 #
+# que puedan delimitar un comentario: doble Slash(//), apertura de bloque(/*)    #
+# y cierre de boque (*/).                                                        #
+# En las lineas en las que se encuentre el patron, se empieza a recorrer         #
+# cada caracter para verificar si se entra en un bloque, se esta en codigo, etc. #
+# Adicionalmente, se puede setear la variable sin_lineas_vacias a 1(uno) para    #
+# contarlas tambien en la cuenta total.                                          #
+##################################################################################
+
 AWKscript='
 BEGIN{
 	codigo = 0
@@ -119,25 +150,31 @@ BEGIN{
 	#print codigo
 }'
 
+#############################################################################
+#                   analizar_archivos()                                     #
+#############################################################################
+# Funcion a ser ejecutada una vez se hayan validado los parametros.         #
+# La misma recorre el directorio recursivamente y analiza con AWK cada uno  #
+# de los archivos coincidentes con la extension.                            #
+#############################################################################
 analizar_archivos() {
     lineasTotal=0;
     codigoTotal=0;
     comentarioTotal=0;
     analizados=0;
-    local directorio=$1;
-    local extension=$2;
-    find $directorio -type f -name "*.$extension" -print0 | 
+local directorio=$1;                                                            # Tanto el directorio como la extension son recibidos 
+local extension=$2;                                                             # por parametro y almacenados en variables locales.
+    find $directorio -type f -name "*.$extension" -print0 |                     # Se realiza la busqueda recursiva desde el directorio recibido
     {
-        while IFS= read -r -d '' archivo; do
-            analizados=$((analizados+1));
-            ##############################################################################
-            # Adicionalmente, se puede cargar el script de AWK desde un archivo adicional#
-            # "AWKscript" comentando la siguiente linea y descomentando la posterior     #
-            ##############################################################################
-            read lineas comentario codigo <<< $(awk "$AWKscript" "$archivo");
-            #read lineas comentario codigo <<< $(awk -f AWKscript "$archivo");
-            lineasTotal=$((lineasTotal+lineas));
-            codigoTotal=$((codigoTotal+codigo));
+        while IFS= read -r -d '' archivo; do                                    # Se reescribe la variable IFS para evitar validar los casos en que el directorio
+            analizados=$((analizados+1));                                       # figure con nueva linea o caracteres especiales.
+                                                                                ###############################################################################
+            read lineas comentario codigo <<< $(awk "$AWKscript" "$archivo");   # Adicionalmente, se puede cargar el script de AWK desde un archivo adicional #
+            #read lineas comentario codigo <<< $(awk -f AWKscript "$archivo");  # "AWKscript" alternando la llamada comentada entre las dos lineas            #
+                                                                                ###############################################################################
+                                                                                # El script de AWK realiza el conteo y retorna los valores como stdout        
+            lineasTotal=$((lineasTotal+lineas));                                # Esta salida se redirige mediante Here-Strings como entrada al stdin del read
+            codigoTotal=$((codigoTotal+codigo));                                # posterior, el cual almacena los valores en variables para el calculo total.
             comentarioTotal=$((comentarioTotal+comentario));
             
         done
@@ -145,7 +182,32 @@ analizar_archivos() {
         echo "Total de lineas analizadas: "$lineasTotal
         echo "Total de comentarios: "$comentarioTotal
         echo "Total de codigo encontrado: "$codigoTotal
+        echo "---------------------------------"
+        
+        printf "Porcentaje de lineas de codigo: "
+        porcentaje codigoTotal lineasTotal
+        printf "Porcentaje de lineas de comentario: "
+        porcentaje comentarioTotal lineasTotal
     }
+}
+
+#############################################################################
+#                   porcentaje()                                            #
+#############################################################################
+# Calculo y visualizacion de porcentaje.                                    #
+#                                                                           #
+# porcentaje    valor_parcial   valor_total                                 #
+#############################################################################
+porcentaje(){
+    parcial=$1;
+    total=$2;
+    if [[ $2 -eq 0 ]]
+    then
+        porcentaje=0;
+    else
+        porcentaje=$(( (parcial*100)/total ))
+    fi
+    echo $porcentaje
 }
 
 if [[ $# -gt 2 ]];
@@ -155,11 +217,17 @@ then
 elif [[ $# -eq 2 ]];
 then
     validar_parametros $1 $2
-    if [[ $? -eq 0 ]]
+    if [[ $? -eq 1 ]]
     then
-        #contar_lineas $1 $2
-        # find $1 -type f -name "*$2" -exec awk -f cmtBlock {} \;
-        #find $1 -type f -name "*$2" -exec contar_lineas {} \;
+        echo "No se pudo validar el directorio. ¿Existe la ruta?";
+        echo "Puede revisar la informacion con -h, -? o --help.";
+    elif [[ $? -eq 2 ]]
+    then
+        echo "No se pudo validar la extension del archivo - verifique que sea correcta.";
+        echo "Puede revisar la informacion con -h, -? o --help.";
+    elif [[ $? -eq 0 ]]
+    then
+        echo "VALIDO"
         analizar_archivos $1 $2
     else
         echo "Los parametros enviados no son validos, ¿ha ingresado una sintaxis correcta?";
